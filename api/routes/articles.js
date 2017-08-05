@@ -1,5 +1,6 @@
 const express = require('express');
 const includes = require('lodash.includes');
+const urlencode = require('urlencode');
 const router = express.Router();
 const Article = require('../models/Article');
 const MESSAGES = require('../bin/messages');
@@ -17,7 +18,13 @@ router.post('/', function(req, res, next){
 });
 
 router.get('/:id', function(req, res, next) {
-  Article.findById(req.params.id, req.query.options)
+  var getArticle;
+  if (req.params.id.substring(0,4) !== "http"){
+    getArticle = Article.findById(req.params.id, req.query.options);
+  } else {
+    getArticle = Article.findByUrl(urlencode.decode(req.params.id), req.query.options);
+  }
+  getArticle
   .then(function(article){
     if (article !== null) {
       res.status(200).json(article);
@@ -25,7 +32,6 @@ router.get('/:id', function(req, res, next) {
       res.status(404).send(MESSAGES.COULD_NOT_FIND_ARTICLE.description);
     }
   }).catch(function(err){
-    console.log(err);
     if (includes(MESSAGES, err)){
       res.status(err.status).send(err.description);
     } else {
@@ -39,7 +45,6 @@ router.post('/', function(req, res, next){
   .then(function(article){
     res.status(201).json(article);
   }).catch(function(err){
-    console.log(err);
     if (includes(MESSAGES, err)){
       res.status(err.status).send(err.description);
     } else {

@@ -25,6 +25,7 @@
     "noodlejs": "^0.3.2",
     "parse-domain": "^1.1.0",
     "shortid": "^2.2.8",
+    "urlencode": "^1.1.0",
     "validator": "^7.0.0"
   },
   "devDependencies": {
