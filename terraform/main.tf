@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 resource "aws_instance" "api_server" {
-	ami = "ami-013f1e6b"
+	ami = "ami-4b133c5d"
 	instance_type = "t2.micro"
 	key_name = "fre"
 	vpc_security_group_ids = ["${aws_security_group.api_server.id}"]
@@ -15,13 +15,12 @@ resource "aws_instance" "api_server" {
 	}
 
 	provisioner "remote-exec" {
-		script = "./provisioner.sh"
+		script = "./api_provisioner.sh"
 
 		connection {
-			user = "bitnami"
+			user = "ubuntu"
 			private_key = "${file("~/Downloads/fre.pem")}"
 			type = "ssh"
-			agent = false
 		}
 	}
 

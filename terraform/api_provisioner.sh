@@ -2,10 +2,13 @@
 
 sudo apt-get update
 
-sudo git clone http://www.github.com/plainviewdata/plainview ~/plainview
+sudo apt-get install -y git
+sudo curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+sudo apt-get install -y nodejs
+sudo apt-get install -y npm
 
-cd ~/plainview/api/
+sudo git clone http://www.github.com/plainviewdata/plainview ~/plainview
 
 sudo npm install --prefix ~/plainview/api/
 
-sudo nohup npm start --prefix ~/plainview/api/
+sudo npm start --prefix ~/plainview/api/

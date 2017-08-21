@@ -1,5 +1,6 @@
 const noodle = require('noodlejs');
 const parseDomain = require('parse-domain');
+const CronJob = require('cron').CronJob;
 const MESSAGES = require('../bin/messages');
 const config = require('../config/scraper');
 const SupportedWebsite = require('../models/SupportedWebsite');
@@ -9,11 +10,12 @@ const find = require('lodash.find');
 const CURRENT_SCRAPING_METHOD = "Noodle/CSS Selectors";
 var SUPPORTED_WEBSITES;
 
-SupportedWebsite.getAll()
-  .then(function(sites){
-    SUPPORTED_WEBSITES = sites;
-  })
-
+new CronJob('* * * * * *', function(){
+  SupportedWebsite.getAll()
+    .then(function(sites){
+      SUPPORTED_WEBSITES = sites;
+    })
+}, null, true);
 
 var scrape = function(url){
   return new Promise(function(resolve, reject){
@@ -30,16 +32,24 @@ var scrape = function(url){
       .then(function(data){
         if (config.tags_retrieval[htmlTag.field_name].combine_fields) {
           content[htmlTag.field_name] = data.results[0].results.join(" ").replace(/\s+/g, " ");
-          if (content[htmlTag.field_name] == "" && config.tags_retrieval[htmlTag.field_name].required) return reject(MESSAGES.COULD_NOT_GET_ARTICLE_INFO);
+          if (content[htmlTag.field_name] == "" && config.tags_retrieval[htmlTag.field_name].required){
+            return reject(MESSAGES.COULD_NOT_GET_ARTICLE_INFO);
+          }
         } else {
           content[htmlTag.field_name] = data.results[0].results;
-          if (content[htmlTag.field_name].length < 1 && config.tags_retrieval[htmlTag.field_name].required) return reject(MESSAGES.COULD_NOT_GET_ARTICLE_INFO);
+          if (content[htmlTag.field_name].length < 1 && config.tags_retrieval[htmlTag.field_name].required) {
+            return reject(MESSAGES.COULD_NOT_GET_ARTICLE_INFO);
+          }
         }
         fields_processed++;
-        if (fields_processed === htmlTags.length) resolve(content);
+        if (fields_processed === htmlTags.length){
+          resolve(content);
+        }
       }).catch(function(err){
         fields_processed++;
-        if (fields_processed === htmlTags.length) resolve(content);
+        if (fields_processed === htmlTags.length){
+          resolve(content);
+        }
       });
     });
   });

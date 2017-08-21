@@ -145,50 +145,66 @@ articleSchema.statics.findByUrl = function findByUrl(url, options) {
 };
 
 articleSchema.methods.checkForChanges = function checkForChanges() {
+  const TIMEOUT_FOR_DIFF_CHECK = 5000;
   var article = this;
   return new Promise(function(resolve, reject){
     scraper.scrape(article.news_site_url)
     .then(function(content){
       var changes = [];
       revision_comparisons.forEach(function(revision_comparison){
-        var diff;
+        var shouldTimeout = true;
         if (typeof article[revision_comparison.field] === 'string'){
-          diff = jsdiff.diffChars(article[revision_comparison.field], content[revision_comparison.comparison]);
+          jsdiff.diffWords(article[revision_comparison.field], content[revision_comparison.comparison], function(err, diff){
+            shouldTimeout = false;
+            checkChanges(diff)
+          });
+          setTimeout(function() {
+            if (shouldTimeout) return reject("Too long"); 
+          }, TIMEOUT_FOR_DIFF_CHECK);
         } else if (typeof article[revision_comparison.field] === 'object'){
-          diff = jsdiff.diffArrays(article[revision_comparison.field], content[revision_comparison.comparison]);
+          jsdiff.diffArrays(article[revision_comparison.field], content[revision_comparison.comparison], function(err, diff){
+            shouldTimeout = false;
+            checkChanges(diff)
+          });
+          setTimeout(function() {
+            if (shouldTimeout) return reject("Too long"); 
+          }, TIMEOUT_FOR_DIFF_CHECK);
         }
-        if (some(diff, ['removed', true]) || some(diff, ['added', true])){
-          diff.forEach(function(d){
-            for (k in d){
-              if (d[k] == undefined) d[k] = null;
+        var checkChanges = function(diff){
+          if (some(diff, ['removed', true]) || some(diff, ['added', true])){
+            diff.forEach(function(d){
+              for (k in d){
+                if (d[k] == undefined) d[k] = null;
+              }
+            });
+            var found = false;
+            article[revision_comparison.diff_field].forEach(function(revision){
+              if (isEqual(revision, diff)){
+                found = true;
+              }
+            });
+            if (found == false){
+              changes.push({diff:diff, field: revision_comparison.diff_field});
             }
-          });
-          var found = false;
-          article[revision_comparison.diff_field].forEach(function(revision){
-            if (isEqual(revision, diff)){
-              found = true;
-            }
-          });
-          if (found == false){
-            changes.push({diff:diff, field: revision_comparison.diff_field});
           }
         }
       });
-      if (isEmpty(changes) == false){
-        article.addRevisions(changes)
+      if (isEmpty(changes)){
+        resolve(article);
+      } else {
+        article.addChanges(changes)
         .then(function(article){
           resolve(article);
         });
-      } else {
-        resolve(article);
       }
     }).catch(function(err){
+      console.log(err)
       reject(err);
     });
   });
 };
 
-articleSchema.methods.addRevisions = function addRevisions(changes) {
+articleSchema.methods.addChanges = function addChanges(changes) {
   var article = this;
   var pushedObject = {};
   changes.forEach(function(change){

@@ -3,14 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www",
+    "start": "pm2 start ./bin/www --watch",
     "test": "mocha spec test"
   },
   "dependencies": {
     "body-parser": "~1.17.1",
+    "cron": "^1.2.1",
     "debug": "~2.6.3",
     "express": "^4.15.2",
-    "request-json": "^0.6.2"
+    "express-session": "^1.15.5",
+    "pm2": "^2.6.1",
+    "request-json": "^0.6.2",
+    "urlencode": "^1.1.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
