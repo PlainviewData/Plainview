@@ -7,7 +7,7 @@ const parseDomain = require('parse-domain');
 
 const supportedWebsiteSchema = new Schema({
 	_id: String,
-  tags_retrieval: [],
+  content_fields: [],
   site_url: String,
   logo_url: String,
   display_name: String,

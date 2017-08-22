@@ -32,6 +32,7 @@ router.get('/:id', function(req, res, next) {
       res.status(404).send(MESSAGES.COULD_NOT_FIND_ARTICLE.description);
     }
   }).catch(function(err){
+    console.log(err)
     if (includes(MESSAGES, err)){
       res.status(err.status).send(err.description);
     } else {
@@ -45,6 +46,7 @@ router.post('/', function(req, res, next){
   .then(function(article){
     res.status(201).json(article);
   }).catch(function(err){
+    console.log(err)
     if (includes(MESSAGES, err)){
       res.status(err.status).send(err.description);
     } else {

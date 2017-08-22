@@ -44,6 +44,8 @@ const articleSchema = new Schema({
   date_posted_revisions: [],
 
 	archive_is_id: String,
+
+  times_to_check: Number
 });
 
 articleSchema.virtual('news_site_domain').get(function () {
@@ -51,39 +53,55 @@ articleSchema.virtual('news_site_domain').get(function () {
 });
 
 articleSchema.statics.createNew = function createNew(url, options){
-  var Archive = this;
+  var Article = this;
   return new Promise(function(resolve, reject){
     if (typeof url !== 'string' && (url instanceof String) === false || validator.isURL(url) === false || parseDomain(url) == null) reject(MESSAGES.INVALID_URL);
     if (some(SUPPORTED_WEBSITES, ['domain', parseDomain(url).domain]) === false) reject(MESSAGES.UNSUPPORTED_WEBSITE);
 
-    Archive.findByUrl(url, options)
-    .then(function(archive){
-      if (archive) {
-        resolve (archive);
+    Article.findByUrl(url, options)
+    .then(function(foundArticle){
+      if (foundArticle) {
+        if (options.ignore_article_min_time_passed || moment.duration(moment().diff(foundArticle.last_checked_for_revision)).asHours() > 1){
+          foundArticle.checkForChanges()
+          .then(function(foundArticle){
+            resolve(foundArticle);
+          }).catch(function(err){
+            reject(err);
+          });
+        } else {
+          resolve(foundArticle);
+        }
       } else {
         url = validator.trim(url);
-        var article = new Article();
-        article.news_site_url = url;
+        var newArticle = new Article();
+        newArticle.news_site_url = url;
         scraper.scrape(url)
         .then(function(content){
-          article.scraped_using = scraper.CURRENT_SCRAPING_METHOD;
-          article.original_headline = content.headline;
-          article.original_story_content = content.story;
-          article.original_authors = content.author; //change to authors
-          article.original_date_posted = content.date; //change to date_posted
+          newArticle.scraped_using = scraper.CURRENT_SCRAPING_METHOD;
+          newArticle.original_headline = content.headline;
+          newArticle.original_story_content = content.story;
+          newArticle.original_authors = content.author; //change to authors
+          newArticle.original_date_posted = content.date; //change to date_posted
         }).then(function(){
-          if (options.post_to_archive_is){
-            return archive_is.save(article.news_site_url).then(function (result) {
-              article.archive_is_id = result.id;
-            });
-          } else {
-            article.archive_is_id = null;
-            return;
-          }
+          Article.findByContent(newArticle, options)
+          .then(function(foundArticle){
+            if (foundArticle){
+              return resovle (foundArticle);
+            } else {
+              if (options.post_to_archive_is){
+                return archive_is.save(newArticle.news_site_url).then(function (result) {
+                  newArticle.archive_is_id = result.id;
+                });
+              } else {
+                newArticle.archive_is_id = null;
+                return;
+              }
+            }
+          })
         }).then(function(){
-          article.save(function(err, article){
+          newArticle.save(function(err, savedArticle){
             if (err) reject(err);
-            resolve(article);
+            resolve(savedArticle);
           }).catch(function(err){
             reject(err);
           });
@@ -101,20 +119,20 @@ articleSchema.statics.createNew = function createNew(url, options){
 articleSchema.statics.findById = function findById(id, options) {
   return new Promise(function(resolve, reject){
     if (shortid.isValid(id) === false) reject(MESSAGES.INVALID_ID);
-    Article.findOne({ _id: id }, function(err, article){
+    Article.findOne({ _id: id }, function(err, foundArticle){
       if (err) reject(err);
-      if (article == null) {
+      if (foundArticle == null) {
         resolve(null);
       } else {
-        if (options.ignore_article_min_time_passed || moment.duration(moment().diff(article.last_checked_for_revision)).asHours() > 1){
-          article.checkForChanges()
-          .then(function(article){
-            resolve(article);
+        if (options.ignore_article_min_time_passed || moment.duration(moment().diff(foundArticle.last_checked_for_revision)).asHours() > 1){
+          foundArticle.checkForChanges()
+          .then(function(foundArticle){
+            resolve(foundArticle);
           }).catch(function(err){
             reject(err);
           });
         } else {
-          resolve(article);
+          resolve(foundArticle);
         }
       }
     });
@@ -124,20 +142,43 @@ articleSchema.statics.findById = function findById(id, options) {
 articleSchema.statics.findByUrl = function findByUrl(url, options) {
   var article = this;
   return new Promise(function(resolve, reject){
-    article.findOne({ news_site_url: url }, function(err, article){
+    article.findOne({ news_site_url: url }, function(err, foundArticle){
       if (err) reject(err);
-      if (article === null) {
+      if (foundArticle === null) {
         resolve(null);
       } else {
-        if (options.ignore_article_min_time_passed || moment.duration(moment().diff(article.last_checked_for_revision)).asHours() > 1){
-          article.checkForChanges()
-          .then(function(article){
-            resolve(article);
+        if (options.ignore_article_min_time_passed || moment.duration(moment().diff(foundArticle.last_checked_for_revision)).asHours() > 1){
+          foundArticle.checkForChanges()
+          .then(function(foundArticle){
+            resolve(foundArticle);
           }).catch(function(err){
             reject(err);
           });
         } else {
-          resolve(article);
+          resolve(foundArticle);
+        }
+      }
+    });
+  });
+};
+
+articleSchema.statics.findByContent = function findByContent(content, options) {
+  var article = this;
+  return new Promise(function(resolve, reject){
+    article.findOne({ original_headline: original_headline }, function(err, foundArticle){
+      if (err) reject(err);
+      if (foundArticle === null) {
+        resolve(null);
+      } else {
+        if (options.ignore_article_min_time_passed || moment.duration(moment().diff(foundArticle.last_checked_for_revision)).asHours() > 1){
+          foundArticle.checkForChanges()
+          .then(function(foundArticle){
+            resolve(foundArticle);
+          }).catch(function(err){
+            reject(err);
+          });
+        } else {
+          resolve(foundArticle);
         }
       }
     });

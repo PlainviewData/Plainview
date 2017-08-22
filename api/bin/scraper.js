@@ -2,7 +2,6 @@ const noodle = require('noodlejs');
 const parseDomain = require('parse-domain');
 const CronJob = require('cron').CronJob;
 const MESSAGES = require('../bin/messages');
-const config = require('../config/scraper');
 const SupportedWebsite = require('../models/SupportedWebsite');
 const some = require('lodash.some');
 const find = require('lodash.find');
@@ -26,28 +25,30 @@ var scrape = function(url){
     }
     var content = {};
     var fields_processed = 0;
-    htmlTags = find(SUPPORTED_WEBSITES, {domain:domain}).tags_retrieval;
-    htmlTags.forEach(function(htmlTag){
-      noodle.query({url: url, selector: htmlTag.tag, type: 'html', extract: 'text'})
+    contentFields = find(SUPPORTED_WEBSITES, {domain:domain}).content_fields;
+    contentFields.forEach(function(contentField){
+      console.log(contentField)
+      noodle.query({url: url, selector: contentField.tag, type: 'html', extract: 'text'})
       .then(function(data){
-        if (config.tags_retrieval[htmlTag.field_name].combine_fields) {
-          content[htmlTag.field_name] = data.results[0].results.join(" ").replace(/\s+/g, " ");
-          if (content[htmlTag.field_name] == "" && config.tags_retrieval[htmlTag.field_name].required){
+        if (contentField.combine_fields) {
+          content[contentField.name] = data.results[0].results.join(" ").replace(/\s+/g, " ");
+          if (contentField.required && content[contentField.name] == ""){
             return reject(MESSAGES.COULD_NOT_GET_ARTICLE_INFO);
           }
         } else {
-          content[htmlTag.field_name] = data.results[0].results;
-          if (content[htmlTag.field_name].length < 1 && config.tags_retrieval[htmlTag.field_name].required) {
+          content[contentField.name] = data.results[0].results;
+          if (contentField.required && content[contentField.name].length < 1) {
             return reject(MESSAGES.COULD_NOT_GET_ARTICLE_INFO);
           }
         }
         fields_processed++;
-        if (fields_processed === htmlTags.length){
+        if (fields_processed === contentFields.length){
           resolve(content);
         }
       }).catch(function(err){
+        console.log(err)
         fields_processed++;
-        if (fields_processed === htmlTags.length){
+        if (fields_processed === contentFields.length){
           resolve(content);
         }
       });
