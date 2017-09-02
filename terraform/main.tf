@@ -6,12 +6,12 @@ provider "aws" {
 
 resource "aws_instance" "api_server" {
 	ami = "ami-4b133c5d"
-	instance_type = "t2.micro"
+	instance_type = "t2.nano"
 	key_name = "fre"
 	vpc_security_group_ids = ["${aws_security_group.api_server.id}"]
 
 	tags {
-		Name = "API_Server"
+		Name = "api_server"
 	}
 
 	provisioner "remote-exec" {
@@ -23,7 +23,48 @@ resource "aws_instance" "api_server" {
 			type = "ssh"
 		}
 	}
+}
 
+resource "aws_instance" "client_server" {
+	ami = "ami-4b133c5d"
+	instance_type = "t2.nano"
+	key_name = "fre"
+	vpc_security_group_ids = ["${aws_security_group.api_server.id}"]
+
+	tags {
+		Name = "client_server"
+	}
+
+	provisioner "remote-exec" {
+		script = "./client_provisioner.sh"
+
+		connection {
+			user = "ubuntu"
+			private_key = "${file("~/Downloads/fre.pem")}"
+			type = "ssh"
+		}
+	}
+}
+
+resource "aws_instance" "proxy_server" {
+	ami = "ami-4b133c5d"
+	instance_type = "t2.nano"
+	key_name = "fre"
+	vpc_security_group_ids = ["${aws_security_group.api_server.id}"]
+
+	tags {
+		Name = "proxy_server"
+	}
+
+	provisioner "remote-exec" {
+		script = "./proxy_provisioner.sh"
+
+		connection {
+			user = "ubuntu"
+			private_key = "${file("~/Downloads/fre.pem")}"
+			type = "ssh"
+		}
+	}
 }
 
 resource "aws_security_group" "api_server" {
@@ -44,6 +85,14 @@ resource "aws_security_group" "api_server" {
 	}
 }
 
-output "API IP" {
+output "api_ip" {
 	value = "${aws_instance.api_server.public_ip}"
+}
+
+output "client_ip" {
+	value = "${aws_instance.client_server.public_ip}"
+}
+
+output "proxy_ip" {
+	value = "${aws_instance.proxy_server.public_ip}"
 }
