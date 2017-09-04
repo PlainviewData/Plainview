@@ -83,7 +83,7 @@ resource "aws_instance" "web_server" {
 
 	provisioner "file" {
 		source = "./provisioners/nginx_provisioner.sh"
-		destination = "~/tmp/nginx_provisioner.sh"
+		destination = "~/nginx_provisioner.sh"
 
 		connection {
 			user = "ubuntu"
@@ -94,8 +94,8 @@ resource "aws_instance" "web_server" {
 
 	provisioner "remote-exec" {
 		inline = [
-			"sudo chmod +x ~/tmp/api_provisioner"
-			"./~/tmp/api_provisioner api_server_ip=${aws_instance.api_server.public_ip} client_server_ip=${aws_instance.client_server.public_ip} proxy_server_ip=${aws_instance.proxy_server.public_ip}"
+			"sudo chmod +x ~/nginx_provisioner.sh",
+			"~/nginx_provisioner.sh api_server_ip=${aws_instance.api_server.public_ip} client_server_ip=${aws_instance.client_server.public_ip} proxy_server_ip=${aws_instance.proxy_server.public_ip}"
 		]
 
 		connection {
@@ -136,6 +136,6 @@ output "proxy_ip" {
 	value = "${aws_instance.proxy_server.public_ip}"
 }
 
-#output "web_server_ip" {
-#	value = "${aws_instance.web_server.public_ip}"
-#}
+output "web_server_ip" {
+	value = "${aws_instance.web_server.public_ip}"
+}

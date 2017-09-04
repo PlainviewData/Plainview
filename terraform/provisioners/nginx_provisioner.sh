@@ -40,3 +40,5 @@ sudo python ~/plainview/webserver/nginx_config.py --api_server_ip "${api_server_
 sudo cp ~/plainview/webserver/default ~/../../etc/nginx/sites-available/
 
 sudo cp ~/plainview/webserver/default ~/../../etc/nginx/sites-enabled/
+
+sudo service nginx start
