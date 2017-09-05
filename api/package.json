@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nohup node server.js &",
+    "start": "forever ./bin/www",
     "test": "mocha spec test"
   },
   "dependencies": {

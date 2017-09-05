@@ -4,7 +4,7 @@ server {
     server_name 127.0.0.1;
 
     location = / {
-        proxy_pass http://{{client_server_ip}}:80;
+        proxy_pass http://{{client_server_ip}}:4001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -13,7 +13,7 @@ server {
     }
 
     location = /supported_websites {
-        proxy_pass http://{{client_server_ip}}:80;
+        proxy_pass http://{{client_server_ip}}:4001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -22,7 +22,7 @@ server {
     }
 
     location ~ ^/pvstatic {
-        proxy_pass http://{{client_server_ip}}:80;
+        proxy_pass http://{{client_server_ip}}:4001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -31,7 +31,7 @@ server {
     }
 
     location ~ ^/articles {
-        proxy_pass http://{{client_server_ip}}:80;
+        proxy_pass http://{{client_server_ip}}:4001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -40,7 +40,7 @@ server {
     }
 
     location ~ ^/archives {
-        proxy_pass http://{{client_server_ip}}:80;
+        proxy_pass http://{{client_server_ip}}:4001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';

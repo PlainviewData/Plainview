@@ -95,7 +95,7 @@ resource "aws_instance" "web_server" {
 	provisioner "remote-exec" {
 		inline = [
 			"sudo chmod +x ~/nginx_provisioner.sh",
-			"~/nginx_provisioner.sh -a ${aws_instance.api_server.public_ip} -c ${aws_instance.client_server.public_ip} -p ${aws_instance.proxy_server.public_ip}"
+			"~/nginx_provisioner.sh  -a ${aws_instance.api_server.public_ip} -c ${aws_instance.client_server.public_ip} -p ${aws_instance.proxy_server.public_ip}"
 		]
 
 		connection {
