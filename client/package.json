@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "forever ./bin/www",
+    "start": "forever start ./bin/www",
     "test": "mocha spec test"
   },
   "dependencies": {
@@ -12,6 +12,7 @@
     "debug": "~2.6.3",
     "express": "^4.15.2",
     "express-session": "^1.15.5",
+    "forever": "^0.15.3",
     "pm2": "^2.6.1",
     "request-json": "^0.6.2",
     "urlencode": "^1.1.0"
