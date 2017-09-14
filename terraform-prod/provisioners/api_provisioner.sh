@@ -11,4 +11,6 @@ sudo git clone http://www.github.com/plainviewdata/plainview ~/plainview
 
 sudo npm install --prefix ~/plainview/api/
 
+sudo npm install forever
+
 sudo npm start --prefix ~/plainview/api/
