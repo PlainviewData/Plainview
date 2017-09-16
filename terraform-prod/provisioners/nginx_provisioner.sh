@@ -24,4 +24,4 @@ sudo cp ~/plainview/webserver/default ~/../../etc/nginx/sites-available/
 
 sudo cp ~/plainview/webserver/default ~/../../etc/nginx/sites-enabled/
 
-sudo service nginx start
+sudo service nginx reload

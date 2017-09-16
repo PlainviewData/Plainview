@@ -1,3 +1,5 @@
+require('es6-promise').polyfill();
+
 const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const jshint = require('gulp-jshint');
