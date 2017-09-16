@@ -119,61 +119,109 @@ articleSchema.virtual('news_site_domain').get(function () {
 //   });
 // };
 
+// articleSchema.statics.createNew = function createNew(url, options){
+//   var Article = this;
+//   return new Promise(function(resolve, reject){
+//     if (typeof url !== 'string' && (url instanceof String) === false || validator.isURL(url) === false || parseDomain(url) == null) reject(MESSAGES.INVALID_URL);
+//     if (some(SUPPORTED_WEBSITES, ['domain', parseDomain(url).domain]) === false) reject(MESSAGES.UNSUPPORTED_WEBSITE);
+//     var newArticle = new Article();
+//     url = validator.trim(url);
+//     newArticle.news_site_url = url;
+    
+//     Article.findByUrl(url, options)
+//     .then(function(foundArticle){
+//       return new Promise(function(resolve,reject){
+//         if (foundArticle) {
+//           if (options.ignore_article_min_time_passed || moment.duration(moment().diff(foundArticle.last_checked_for_revision)).asHours() > 1){
+//             foundArticle.checkForChanges()
+//             .then(function(foundArticle){
+//               resolve(foundArticle); return;
+//             }).catch(function(err){
+//               reject(err); return;
+//             });
+//           } else {
+//             resolve(foundArticle); return;
+//           }
+//         }
+//       });
+//     })
+//     .then(scraper.scrapeMetadata(url, METADATA_FIELDS))
+//     .then(function(metadata){
+//       return new Promise(function(resolve, reject){
+//         newArticle.metadata = metadata;
+//         Article.findByUrlTitle(url, newArticle.metadata.title, options)
+//       });
+//     })
+//     .then(function(foundArticle){
+//       return new Promise(function(resolve, reject){
+//         if (savedArticle) resolve(savedArticle); return;
+//       })
+//     })
+//     .then(scraper.scrapeContent(url))
+//     .then(function(content){
+//       return new Promise(function(resolve, reject){
+//         newArticle.scraped_using = scraper.CURRENT_SCRAPING_METHOD;
+//         newArticle.original_headline = content.headline;
+//         newArticle.original_story_content = content.story;
+//         newArticle.original_authors = content.author; //change to authors
+//         newArticle.original_date_posted = content.date; //change to date_posted
+//         newArticle.save(function(err, savedArticle){
+//           if (err) reject(err); return;
+//           if (savedArticle) resolve(savedArticle); return;
+//         });
+//       })
+//     })
+//     .catch(function(err){
+//       reject (err); return;
+//     })
+//   });
+// };
+
 articleSchema.statics.createNew = function createNew(url, options){
-  var Article = this;
+  var Archive = this;
   return new Promise(function(resolve, reject){
     if (typeof url !== 'string' && (url instanceof String) === false || validator.isURL(url) === false || parseDomain(url) == null) reject(MESSAGES.INVALID_URL);
     if (some(SUPPORTED_WEBSITES, ['domain', parseDomain(url).domain]) === false) reject(MESSAGES.UNSUPPORTED_WEBSITE);
-    var newArticle = new Article();
-    url = validator.trim(url);
-    newArticle.news_site_url = url;
-    
-    Article.findByUrl(url, options)
-    .then(function(foundArticle){
-      return new Promise(function(resolve,reject){
-        if (foundArticle) {
-          if (options.ignore_article_min_time_passed || moment.duration(moment().diff(foundArticle.last_checked_for_revision)).asHours() > 1){
-            foundArticle.checkForChanges()
-            .then(function(foundArticle){
-              resolve(foundArticle); return;
-            }).catch(function(err){
-              reject(err); return;
+
+    Archive.findByUrl(url, options)
+    .then(function(archive){
+      if (archive) {
+        resolve (archive);
+      } else {
+        url = validator.trim(url);
+        var article = new Article();
+        article.news_site_url = url;
+        scraper.scrapeContent(url)
+        .then(function(content){
+          article.scraped_using = scraper.CURRENT_SCRAPING_METHOD;
+          article.original_headline = content.headline;
+          article.original_story_content = content.story;
+          article.original_authors = content.author; //change to authors
+          article.original_date_posted = content.date; //change to date_posted
+        }).then(function(){
+          if (options.post_to_archive_is){
+            return archive_is.save(article.news_site_url).then(function (result) {
+              article.archive_is_id = result.id;
             });
           } else {
-            resolve(foundArticle); return;
+            article.archive_is_id = null;
+            return;
           }
-        }
-      });
-    })
-    .then(scraper.scrapeMetadata(url, METADATA_FIELDS))
-    .then(function(metadata){
-      return new Promise(function(resolve, reject){
-        newArticle.metadata = metadata;
-        Article.findByUrlTitle(url, newArticle.metadata.title, options)
-      });
-    })
-    .then(function(foundArticle){
-      return new Promise(function(resolve, reject){
-        if (savedArticle) resolve(savedArticle); return;
-      })
-    })
-    .then(scraper.scrapeContent(url))
-    .then(function(content){
-      return new Promise(function(resolve, reject){
-        newArticle.scraped_using = scraper.CURRENT_SCRAPING_METHOD;
-        newArticle.original_headline = content.headline;
-        newArticle.original_story_content = content.story;
-        newArticle.original_authors = content.author; //change to authors
-        newArticle.original_date_posted = content.date; //change to date_posted
-        newArticle.save(function(err, savedArticle){
-          if (err) reject(err); return;
-          if (savedArticle) resolve(savedArticle); return;
+        }).then(function(){
+          article.save(function(err, article){
+            if (err) reject(err);
+            resolve(article);
+          }).catch(function(err){
+            reject(err);
+          });
+        }).catch(function(err){
+          reject(err);
         });
-      })
+      }
     })
     .catch(function(err){
-      reject (err); return;
-    })
+      reject(err); return;
+    });
   });
 };
 

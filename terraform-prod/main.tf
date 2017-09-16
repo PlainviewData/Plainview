@@ -92,7 +92,7 @@ resource "aws_instance" "web_server" {
 	vpc_security_group_ids = ["${aws_security_group.api_server.id}"]
 
 	tags {
-		Name = "api_server"
+		Name = "web_server"
 	}
 
 	provisioner "file" {
