@@ -80,27 +80,23 @@ p {
 }
 
 .bar{
-	box-shadow: 0 1px 1px #ccc;
 	border-radius: 2px;
-	margin: 10px auto 10px;
+	margin: 20px auto 10px;
 	position:relative;
 }
 
 .bar input{
 	background:#fff no-repeat 13px 13px;
 
-	border: 6px solid  #BECED5;
+	border: solid  #BECED5;
 	width: 100%;
-	line-height: 19px;
-	padding: 11px 0;
+	padding: 9px;
 
-	border-radius: 2px;
-	box-shadow: 0 2px 8px #c4c4c4 inset;
+	border-radius: 1px;
 	text-align: left;
 	font-size: 14px;
-	font-weight: bold;
 	outline: none;
-	text-indent: 40px;
+	text-indent: 10px;
 }
 
 ul{

@@ -14,7 +14,7 @@ $("#urlInputForm").submit(function(event) {
 			// document.write(res);
 			// document.close();
 
-			window.location = ("/articles/"+res.body._id); 
+			window.location = ("/"+res.body.news_site_url); 
 
 		}
 	});

@@ -7,55 +7,54 @@
 
     <title>Plainview</title>
     <link href="https://fonts.googleapis.com/css?family=Lato:400,900" rel="stylesheet">
-    <link rel="stylesheet" href="pvstatic/css/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="pvstatic/css/material/bootstrap-material-design.min.css">
     <link rel="stylesheet" href="pvstatic/css/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
   </head>
 
   <body>
     <div class="container-fluid">
+
       <!-- logo -->
-      <div class="row lg">
+      <div class="row">
         <div class="col-md-12 logo">
           <img src="pvstatic/img/plainview-sm.png" id="logo" alt="logo" />
         </div>
       </div>
 
-      <!-- form -->
-      <div class="row form">
-        <div class="col-md-12">
-          <form class="form-inline" id="urlInputForm">
-            Archive an article
-            <div class="form-group">
-              <!-- <label for="urlinput">Name</label> -->
-              <input type="text" class="form-control" id="urlInput" placeholder="Input URL Here">
-            </div>
-            <button type="submit" class="btn btn-default" id="go">Go</button>
-          </form>
-        </div>
-      </div>
 
-      <!-- message -->
-      <div class="row">
-        <div class="col-md-4 col-md-offset-4">
-          <div class="msg">
-          <center>
-            <p id="urlMsg"></p>
-            </center>
+      <!-- form -->
+      <div class="row ">
+        <form class="form-inline" id="urlInputForm">
+          
+          <div class="col">
+            Enter url:
           </div>
-        </div>
+          
+          <div class="col">
+            <fieldset class="form-group">
+              <label id="urlMsg" for="urlInput" class="bmd-label-static"></label>
+              <input type="text" class="form-control" id="urlInput">
+            </fieldset>
+          </div>
+
+          <div class="col">
+            <button type="submit" class="btn btn-raised btn-primary" id="go">Archive it</button>
+          </div>
+
+        </form>
       </div>
 
       <!-- site search -->
       <div class="siteSearch" ng-app="siteSearch" ng-controller="siteSearchController">
         <div class="bar">
           <!-- Create a binding between the searchString model and the text field -->
-          <input style="border-width: 2px;" type="text" ng-model="searchString" placeholder="Search supported sites" />
+          <input style="border-width: 1px;" type="text" ng-model="searchString" placeholder="Search supported sites" />
         </div>
         <ul>
           <!-- Render a li element for every entry in the items array. -->
           <li ng-repeat="i in items | searchFor:searchString">
-            <a href="{{i.site_url}}"><img ng-src="{{i.logo_url}}" /></a>
+            <a href="{{i.site_url}}"><img style='border:0.5px solid #7f7f7f' ng-src="{{i.logo_url}}" /></a>
             <a href="{{i.site_url}}"><p>{{i.display_name}}</p></a>
           </li>
         </ul>
@@ -64,7 +63,7 @@
     </div> <!-- container-fluid -->
 
     <script src="pvstatic/js/lib/jquery.min.js"></script>
-    <script src="pvstatic/js/lib/bootstrap.min.js"></script>
+    <script src="pvstatic/js/material/bootstrap-material-design.min.js"></script>
     <script src="pvstatic/js/supported_websites.js"></script>
     <script src="pvstatic/js/api.js"></script>
 
