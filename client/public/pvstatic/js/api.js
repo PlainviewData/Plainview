@@ -13,9 +13,11 @@ $("#urlInputForm").submit(function(event) {
 			// document.open();
 			// document.write(res);
 			// document.close();
-			
-			$('#classModal').modal('show')
 
+			$('#myModal').modal('show')
+
+			$(".modal-title").html(res.body.original_headline);
+			
 			$("#article_headline").html(res.body.original_headline);
 			$("#article_url").html(res.body.news_site_url);
 			$("#article_date_posted").html(res.body.original_date_posted);
