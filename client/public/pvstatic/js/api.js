@@ -14,7 +14,7 @@ $("#urlInputForm").submit(function(event) {
 			// document.write(res);
 			// document.close();
 
-			$('#myModal').modal('show')
+			$('#articleModal').modal('show')
 
 			$(".modal-title").html(res.body.original_headline);
 			
