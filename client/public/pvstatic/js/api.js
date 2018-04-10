@@ -13,6 +13,8 @@ $("#urlInputForm").submit(function(event) {
 			// document.open();
 			// document.write(res);
 			// document.close();
+			
+			$('.classModal').modal('show')
 
 			$("#article_headline").html(res.body.original_headline);
 			$("#article_url").html(res.body.news_site_url);
