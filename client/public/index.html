@@ -97,8 +97,8 @@
         <ul>
           <!-- Render a li element for every entry in the items array. -->
           <li ng-repeat="i in items | searchFor:searchString">
-            <a href="{{i.site_url}}"><img style='border:0.5px solid #7f7f7f' ng-src="{{i.logo_url}}" /></a>
-            <a href="{{i.site_url}}"><p>{{i.display_name}}</p></a>
+            <a href="{{i.site_url}}" target="_blank"><img style='border:0.5px solid #7f7f7f' ng-src="{{i.logo_url}}" /></a>
+            <a href="{{i.site_url}}" target="_blank"><p>{{i.display_name}}</p></a>
           </li>
         </ul>
       </div>
